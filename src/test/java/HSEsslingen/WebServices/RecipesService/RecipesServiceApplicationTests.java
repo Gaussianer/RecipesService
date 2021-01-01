@@ -1,13 +1,13 @@
-package HSEsslingen.WebServices.RecipesService;
+// package HSEsslingen.WebServices.RecipesService;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class RecipesServiceApplicationTests {
+// @SpringBootTest
+// class RecipesServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+// 	@Test
+// 	void contextLoads() {
+// 	}
 
-}
+// }
