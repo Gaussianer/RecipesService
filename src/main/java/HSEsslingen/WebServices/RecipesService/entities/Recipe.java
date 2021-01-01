@@ -1,11 +1,16 @@
 package HSEsslingen.WebServices.RecipesService.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -19,6 +24,7 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
+@Table(name="recipe")
 public class Recipe implements Serializable{
     
 	private static final long serialVersionUID = 1L;
@@ -40,19 +46,7 @@ public class Recipe implements Serializable{
     @Column( length = 1000000 )
     private String description;
 
-    // @Columns MUSS NOCH Ausgearbeitet werden?! Tuple, Paare? Wie gehst du da vor
-    // private Ingredient[] ingredients;
-  
-    // @Column
-    // private Double quantity; // 500, 1, 20, ...
-    
-    // @Column
-    // private String unit; // Stück, Kg, Liter, etc. ...
-
-    @Column
-    private String imageURL;
-
-    @Column // Eigener Datentyp noch möglich!
+    @Column 
     private String category;
 
     @Column
@@ -73,4 +67,29 @@ public class Recipe implements Serializable{
     @Column(name = "resting_time_in_seconds")
     private long restingTimeInSeconds;
 
+    @OneToMany(mappedBy = "recipe", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
+    @ToString.Exclude
+    private List<Image> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recipe", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
+    @ToString.Exclude
+    private List<Ingredient> ingredients = new ArrayList<>();
+
+    public void addImage(Image image) {
+        image.setRecipe(this);
+        this.images.add(image);
+    }
+
+    public void removeImage(Image image) {
+        this.images.remove(image);
+        image.setRecipe(null);
+    }
+
+    public void addIngredient(Ingredient ingredient) {
+        this.ingredients.add(ingredient);
+    }
+
+    public void removeIngredient(Ingredient ingredient) {
+        this.ingredients.remove(ingredient);
+    }
 }

@@ -14,7 +14,6 @@ public class RecipeDTO extends RepresentationModel<RecipeDTO> {
     private String title;
     private String subTitle;
     private String description;
-    private String imageURL;
     private String category;
     private Integer servings;
     private Double calories;

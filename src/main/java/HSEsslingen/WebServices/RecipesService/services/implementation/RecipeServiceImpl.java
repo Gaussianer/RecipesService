@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-
+import HSEsslingen.WebServices.RecipesService.assemblers.ImageAssembler;
+import HSEsslingen.WebServices.RecipesService.assemblers.IngredientAssembler;
 import HSEsslingen.WebServices.RecipesService.assemblers.RecipeAssembler;
+import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
+import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 import HSEsslingen.WebServices.RecipesService.repositories.RecipeRepository;
@@ -21,12 +24,16 @@ public class RecipeServiceImpl implements RecipeService {
     
     private final RecipeRepository recipeRepository;
     private final RecipeAssembler recipeAssembler;
+    private final ImageAssembler imageAssembler;
+    private final IngredientAssembler ingredientAssembler;
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeAssembler recipeAssembler, PagedResourcesAssembler pagedResourcesAssembler) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeAssembler recipeAssembler, ImageAssembler imageAssembler, IngredientAssembler ingredientAssembler, PagedResourcesAssembler pagedResourcesAssembler) {
         this.recipeRepository = recipeRepository;
         this.recipeAssembler = recipeAssembler;
+        this.imageAssembler = imageAssembler;
+        this.ingredientAssembler = ingredientAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
@@ -69,6 +76,24 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = recipeRepository.findByTitle(title).orElse(null);
         if(recipe != null) {
             return recipeAssembler.toModel(recipe);
+        }
+        return null;
+    }
+
+    @Override
+    public CollectionModel<ImageDTO> findRecipeImages(String id) {
+        Recipe recipe = recipeRepository.findById(id).orElse(null);
+        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
+            return imageAssembler.toCollectionModel(recipe.getImages());
+        }
+        return null;
+    }
+
+    @Override
+    public CollectionModel<IngredientDTO> findRecipeIngredients(String id) {
+        Recipe recipe = recipeRepository.findById(id).orElse(null);
+        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
+            return ingredientAssembler.toCollectionModel(recipe.getIngredients());
         }
         return null;
     }
