@@ -29,7 +29,7 @@ public class ImageController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{plate}/recipe")
+    @GetMapping("/{id}/recipe")
     public ResponseEntity findImageRecipe(@PathVariable String id) {
         RecipeDTO recipe = imageService.findImageRecipe(id);
         if(recipe != null) return ResponseEntity.ok(recipe);

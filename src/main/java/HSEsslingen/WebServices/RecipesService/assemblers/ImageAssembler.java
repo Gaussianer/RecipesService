@@ -5,10 +5,8 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
 import HSEsslingen.WebServices.RecipesService.controller.ImageController;
-import HSEsslingen.WebServices.RecipesService.controller.RecipeController;
 import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
-
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
