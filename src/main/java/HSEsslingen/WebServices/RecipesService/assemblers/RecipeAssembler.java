@@ -30,9 +30,9 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
             recipeEntity.getRestingTimeInSeconds()
             );
 
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeIngredientsByUUID(recipeEntity.getUuid())).withRel("ingredients"));
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeImagesByUUID(recipeEntity.getUuid())).withRel("images"));
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findByUUID(recipeEntity.getUuid())).withSelfRel());
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeIngredientsByRecipeUUID(recipeEntity.getUuid())).withRel("ingredients"));
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeImagesByRecipeUUID(recipeEntity.getUuid())).withRel("images"));
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid())).withSelfRel());
         return recipeDTO;
     }
 }

@@ -20,4 +20,8 @@ public interface RecipeService {
     RecipeDTO findByTitle(String title);
 
     RecipeDTO insert(Recipe recipe);
+
+    RecipeDTO replaceByUUID(String uuid, Recipe recipe);
+
+    boolean removeByUUID(String uuid);
 }
