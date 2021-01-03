@@ -17,14 +17,14 @@ public class IngredientAssembler implements RepresentationModelAssembler<Ingredi
     public IngredientDTO toModel(Ingredient ingredientEntity) {
             
             IngredientDTO ingredientDTO = new IngredientDTO(
-                ingredientEntity.getId(),
+                ingredientEntity.getUuid(),
                 ingredientEntity.getName(),
                 ingredientEntity.getQuantity(),
                 ingredientEntity.getUnit()
                 );
                 
 
-            ingredientDTO.add(linkTo(methodOn(IngredientController.class).findById(ingredientEntity.getId())).withSelfRel());
+            ingredientDTO.add(linkTo(methodOn(IngredientController.class).findByUUID(ingredientEntity.getUuid())).withSelfRel());
         return ingredientDTO;
     }
 }

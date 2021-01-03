@@ -22,8 +22,8 @@ public class IngredientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity findById(@PathVariable String id) {
-        IngredientDTO ingredient = ingredientService.findById(id);
+    public ResponseEntity findByUUID(@PathVariable String id) {
+        IngredientDTO ingredient = ingredientService.findByUUID(id);
         if(ingredient != null) return ResponseEntity.ok(ingredient);
         return ResponseEntity.notFound().build();
     }

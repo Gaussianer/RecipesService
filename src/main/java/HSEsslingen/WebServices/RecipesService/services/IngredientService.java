@@ -4,6 +4,6 @@ import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
 
 public interface IngredientService {
     
-    IngredientDTO findById(String id);
+    IngredientDTO findByUUID(String uuid);
 
 }

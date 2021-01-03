@@ -23,15 +23,15 @@ public class ImageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity findById(@PathVariable String id) {
-        ImageDTO image = imageService.findById(id);
+    public ResponseEntity findByUUID(@PathVariable String id) {
+        ImageDTO image = imageService.findByUUID(id);
         if(image != null) return ResponseEntity.ok(image);
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/recipe")
-    public ResponseEntity findImageRecipe(@PathVariable String id) {
-        RecipeDTO recipe = imageService.findImageRecipe(id);
+    public ResponseEntity findImageRecipeByUUID(@PathVariable String id) {
+        RecipeDTO recipe = imageService.findImageRecipeByUUID(id);
         if(recipe != null) return ResponseEntity.ok(recipe);
         return ResponseEntity.notFound().build();
     }

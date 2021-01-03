@@ -8,6 +8,6 @@ import HSEsslingen.WebServices.RecipesService.entities.Image;
 
 public interface ImageRepository extends JpaRepository<Image, String>{
     
-    Optional<Image> findById(String id);
-
+    Optional<Image> findByUuid(String uuid);
+    
 }

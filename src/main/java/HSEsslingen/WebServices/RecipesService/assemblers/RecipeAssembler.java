@@ -17,7 +17,7 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
     @Override
     public RecipeDTO toModel(Recipe recipeEntity) {
         RecipeDTO recipeDTO = new RecipeDTO(
-            recipeEntity.getId(), 
+            recipeEntity.getUuid(), 
             recipeEntity.getTitle(),
             recipeEntity.getSubTitle(),
             recipeEntity.getDescription(),
@@ -30,9 +30,9 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
             recipeEntity.getRestingTimeInSeconds()
             );
 
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeIngredients(recipeEntity.getId())).withRel("ingredients"));
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeImages(recipeEntity.getId())).withRel("images"));
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).findById(recipeEntity.getId())).withSelfRel());
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeIngredientsByUUID(recipeEntity.getUuid())).withRel("ingredients"));
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).findRecipeImagesByUUID(recipeEntity.getUuid())).withRel("images"));
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).findByUUID(recipeEntity.getUuid())).withSelfRel());
         return recipeDTO;
     }
 }

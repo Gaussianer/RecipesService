@@ -8,6 +8,6 @@ import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 
 public interface IngredientRepository extends JpaRepository<Ingredient, String>{
     
-    Optional<Ingredient> findById(String id);
-
+    Optional<Ingredient> findByUuid(String uuid);
+    
 }

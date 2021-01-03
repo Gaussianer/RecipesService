@@ -45,9 +45,9 @@ public class RecipeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity findById(@PathVariable String id) {
+    public ResponseEntity findByUUID(@PathVariable String id) {
 
-        RecipeDTO recipeDTO = recipeService.findById(id);
+        RecipeDTO recipeDTO = recipeService.findByUUID(id);
         if (recipeDTO == null) {
             return ResponseEntity.notFound().build();
         }
@@ -56,16 +56,16 @@ public class RecipeController {
     }
 
     @GetMapping("/{id}/images")
-    public ResponseEntity findRecipeImages(@PathVariable String id) {
-        CollectionModel<ImageDTO> images = recipeService.findRecipeImages(id);
+    public ResponseEntity findRecipeImagesByUUID(@PathVariable String id) {
+        CollectionModel<ImageDTO> images = recipeService.findRecipeImagesByUUID(id);
         if(images != null) return ResponseEntity.ok(images);
 
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/ingredients")
-    public ResponseEntity findRecipeIngredients(@PathVariable String id) {
-        CollectionModel<IngredientDTO> ingredients = recipeService.findRecipeIngredients(id);
+    public ResponseEntity findRecipeIngredientsByUUID(@PathVariable String id) {
+        CollectionModel<IngredientDTO> ingredients = recipeService.findRecipeIngredientsByUUID(id);
         if(ingredients != null) return ResponseEntity.ok(ingredients);
 
         return ResponseEntity.noContent().build();

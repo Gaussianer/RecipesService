@@ -11,11 +11,11 @@ public interface RecipeService {
 
     CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir);
 
-    CollectionModel<ImageDTO> findRecipeImages(String id);
+    CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid);
 
-    CollectionModel<IngredientDTO> findRecipeIngredients(String id);
+    CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid);
 
-    RecipeDTO findById(String id);
+    RecipeDTO findByUUID(String uuid);
 
     RecipeDTO findByTitle(String title);
 

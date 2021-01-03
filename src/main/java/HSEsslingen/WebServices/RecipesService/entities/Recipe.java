@@ -4,15 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.*;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,12 +22,14 @@ public class Recipe implements Serializable{
     
 	private static final long serialVersionUID = 1L;
 
-	@Id
-    @GeneratedValue(generator = "uuid2") // Überprüfen, ob und wie du ein Primary-Key setzt
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private String id;
+
+    @Column(unique = true)
+    @EqualsAndHashCode.Include
+    private String uuid;
 
     @Column
     @EqualsAndHashCode.Include

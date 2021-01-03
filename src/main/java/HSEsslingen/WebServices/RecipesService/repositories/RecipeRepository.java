@@ -10,5 +10,6 @@ import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 public interface RecipeRepository extends JpaRepository<Recipe, String>{
     
     Optional<Recipe> findByTitle(String title);
+    Optional<Recipe> findByUuid(String uuid);
 
 }

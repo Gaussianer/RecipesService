@@ -1,5 +1,7 @@
 package HSEsslingen.WebServices.RecipesService.services.implementation;
 
+import java.util.Arrays;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -42,6 +44,7 @@ public class RecipeServiceImpl implements RecipeService {
     public CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir) {
         PageRequest pageRequest;
         Sort.Direction direction;
+
         if(sort == null) {
             pageRequest = PageRequest.of(page, size);
         }
@@ -53,6 +56,8 @@ public class RecipeServiceImpl implements RecipeService {
                 direction = Sort.Direction.DESC;
             }
             pageRequest = PageRequest.of(page, size, Sort.by(direction, sort));
+            
+
         }
         Page<Recipe> recipes = recipeRepository.findAll(pageRequest);
 
@@ -63,8 +68,8 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeDTO findById(String id) {
-        Recipe recipe = recipeRepository.findById(id).orElse(null);
+    public RecipeDTO findByUUID(String uuid) {
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
         if(recipe != null) {
             return recipeAssembler.toModel(recipe);
         }
@@ -81,8 +86,8 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public CollectionModel<ImageDTO> findRecipeImages(String id) {
-        Recipe recipe = recipeRepository.findById(id).orElse(null);
+    public CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid) {
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
         if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
             return imageAssembler.toCollectionModel(recipe.getImages());
         }
@@ -90,9 +95,9 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public CollectionModel<IngredientDTO> findRecipeIngredients(String id) {
-        Recipe recipe = recipeRepository.findById(id).orElse(null);
-        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
+    public CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid) {
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
+        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getIngredients())) ) {
             return ingredientAssembler.toCollectionModel(recipe.getIngredients());
         }
         return null;

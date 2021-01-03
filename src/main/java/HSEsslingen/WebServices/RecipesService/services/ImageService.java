@@ -8,7 +8,7 @@ import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 
 public interface ImageService {
 
-    ImageDTO findById(String id);
+    ImageDTO findByUUID(String uuid);
 
-    RecipeDTO findImageRecipe(String id);
+    RecipeDTO findImageRecipeByUUID(String uuid);
 }

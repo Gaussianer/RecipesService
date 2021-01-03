@@ -22,8 +22,8 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
-    public IngredientDTO findById(String id) {
-        Ingredient ingredient = ingredientRepository.findById(id).orElse(null);
+    public IngredientDTO findByUUID(String id) {
+        Ingredient ingredient = ingredientRepository.findByUuid(id).orElse(null);
         if(ingredient != null) {
             return ingredientAssembler.toModel(ingredient);
         }

@@ -28,8 +28,8 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
-    public ImageDTO findById(String id) {
-        Image image = imageRepository.findById(id).orElse(null);
+    public ImageDTO findByUUID(String uuid) {
+        Image image = imageRepository.findByUuid(uuid).orElse(null);
         if(image != null) {
             return imageAssembler.toModel(image);
         }
@@ -37,8 +37,8 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public RecipeDTO findImageRecipe(String id) {
-        Image image = imageRepository.findById(id).orElse(null);
+    public RecipeDTO findImageRecipeByUUID(String uuid) {
+        Image image = imageRepository.findByUuid(uuid).orElse(null);
         if(image != null && image.getRecipe() != null) {
             return recipeAssembler.toModel(image.getRecipe());
         }
