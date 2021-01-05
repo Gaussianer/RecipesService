@@ -25,6 +25,8 @@ INSERT INTO ingredient (uuid, ingredient_name, ingredient_quantity, ingredient_u
 INSERT INTO ingredient (uuid, ingredient_name, ingredient_quantity, ingredient_unit, recipe_id) VALUES (RANDOM_UUID(), 'Avocado', 0.5, 'Stück', 1);
 
 
+INSERT INTO image (uuid, image_name, image_url, ingredient_id) VALUES (RANDOM_UUID(), 'Testzutat', 'www.egal.de', 1);
+
 INSERT INTO ingredient (uuid, ingredient_name, ingredient_quantity, ingredient_unit, recipe_id) VALUES (RANDOM_UUID(), 'Reis', 80, 'Gramm', 1);
 INSERT INTO ingredient (uuid, ingredient_name, ingredient_quantity, ingredient_unit, recipe_id) VALUES (RANDOM_UUID(), 'Mehl', 2, 'Esslöffel ', 1);
 INSERT INTO ingredient (uuid, ingredient_name, ingredient_quantity, ingredient_unit, recipe_id) VALUES (RANDOM_UUID(), 'Paprikapulver, rosenscharf', 1, 'Messerspitze  ', 1);

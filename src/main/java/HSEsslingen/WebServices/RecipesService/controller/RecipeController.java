@@ -126,20 +126,16 @@ public class RecipeController {
     // ##############################                   RECIPES/IMAGES                       ##############################
     // ####################################################################################################################
 
+    // Darf nur noch die IDs oder Links zurück liefern, anstatt zusätzliche Infos?!
+    // " /recipes/.../images wäre nur hilfreich, wenn Du
+    // nicht nur IDs lieferst, sondern noch viel mehr Informationen, die man bei /recipes/2
+    // nicht immer komplett mit abfragen möchte.""
     @GetMapping("/{recipeId}/images")
     public ResponseEntity getRecipeImagesByRecipeUUID(@PathVariable String recipeId) {
         CollectionModel<ImageDTO> images = recipeService.findRecipeImagesByUUID(recipeId);
         if(images != null) return ResponseEntity.ok(images);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping
-    (value = "/{recipeId}/images/{imageId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity findImageRecipeByUUIDs(@PathVariable String recipeId, @PathVariable String imageId) {
-        ImageDTO image = imageService.findByUUID(imageId);
-        if(image != null) return ResponseEntity.ok(image);
-        return ResponseEntity.notFound().build();
     }
 
     // ####################################################################################################################

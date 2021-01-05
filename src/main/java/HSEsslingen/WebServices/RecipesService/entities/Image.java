@@ -40,8 +40,12 @@ public class Image implements Serializable{
     @Column(name = "image_url")
     @EqualsAndHashCode.Include
     private String url;
-    
+
     @ManyToOne
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+    
+    @ManyToOne
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 }

@@ -5,6 +5,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
 import HSEsslingen.WebServices.RecipesService.controller.ImageController;
+import HSEsslingen.WebServices.RecipesService.controller.RecipeController;
 import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 
@@ -22,9 +23,13 @@ public class ImageAssembler implements RepresentationModelAssembler<Image, Image
             imageEntity.getName(),
             imageEntity.getUrl()
             );
-            
-            imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(ImageController.class).findImageRecipeByUUID(imageEntity.getUuid())).withRel("recipe"));
-            imageDTO.add(linkTo(methodOn(ImageController.class).findByUUID(imageEntity.getUuid())).withSelfRel());
+            if(imageEntity.getIngredient() != null) {
+            // Wenn Ingredient ausgebaut wird, dann hier noch wie bei Recipe ausbessern
+            // imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(ImageController.class).findImageRecipeByUUID(imageEntity.getUuid())).withRel("recipe")); 
+            } else if (imageEntity.getRecipe() != null) {
+            imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(RecipeController.class).getRecipeByUUID(imageEntity.getRecipe().getUuid())).withRel("recipe"));
+            }
+            imageDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(imageEntity.getUuid())).withSelfRel());
         return imageDTO;
     }
 }
