@@ -165,12 +165,12 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipe != null) {
 
             recipe.getImages().forEach(image -> {
-                imageRepository.deleteById(image.getId());
+                image.setIngredient(null);
             });
 
-            recipe.getIngredients().forEach(ingredient -> {
-                ingredientRepository.deleteById(ingredient.getId());
-            });
+            // recipe.getIngredients().forEach(ingredient -> {
+            //     ingredientRepository.deleteById(ingredient.getId());
+            // });
 
             recipeRepository.deleteById(recipe.getId());
             wasRecipeDeleted = true;
