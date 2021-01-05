@@ -3,8 +3,10 @@ package HSEsslingen.WebServices.RecipesService.assemblers;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+import HSEsslingen.WebServices.RecipesService.controller.ImageController;
 import HSEsslingen.WebServices.RecipesService.controller.IngredientController;
 import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
+import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -15,7 +17,7 @@ public class IngredientAssembler implements RepresentationModelAssembler<Ingredi
 
     @Override
     public IngredientDTO toModel(Ingredient ingredientEntity) {
-            
+
             IngredientDTO ingredientDTO = new IngredientDTO(
                 ingredientEntity.getUuid(),
                 ingredientEntity.getName(),
@@ -23,8 +25,11 @@ public class IngredientAssembler implements RepresentationModelAssembler<Ingredi
                 ingredientEntity.getUnit()
                 );
                 
+            for(Image image : ingredientEntity.getImages()){
+                ingredientDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(image.getUuid())).withRel("images"));
+            }
 
-            ingredientDTO.add(linkTo(methodOn(IngredientController.class).findByUUID(ingredientEntity.getUuid())).withSelfRel());
+            ingredientDTO.add(linkTo(methodOn(IngredientController.class).getIngredientByUUID(ingredientEntity.getUuid())).withSelfRel());
         return ingredientDTO;
     }
 }

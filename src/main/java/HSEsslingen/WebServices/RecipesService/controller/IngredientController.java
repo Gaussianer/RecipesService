@@ -48,7 +48,7 @@ public class IngredientController {
     }
 
     @GetMapping("/{ingredientId}")
-    public ResponseEntity findByUUID(@PathVariable String ingredientId) {
+    public ResponseEntity getIngredientByUUID(@PathVariable String ingredientId) {
         IngredientDTO ingredient = ingredientService.findByUUID(ingredientId);
         if(ingredient != null) return ResponseEntity.ok(ingredient);
         return ResponseEntity.notFound().build();

@@ -1,5 +1,8 @@
 package HSEsslingen.WebServices.RecipesService.dtos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
