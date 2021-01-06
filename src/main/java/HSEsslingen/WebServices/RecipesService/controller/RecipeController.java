@@ -1,7 +1,6 @@
 package HSEsslingen.WebServices.RecipesService.controller;
 
-import java.util.UUID;
-
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
@@ -17,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
-import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 import HSEsslingen.WebServices.RecipesService.services.ImageService;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
-
+import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
+import net.kaczmarzyk.spring.data.jpa.domain.Equal;
+import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
 
 
 @RestController
@@ -31,26 +30,30 @@ import HSEsslingen.WebServices.RecipesService.services.RecipeService;
 public class RecipeController {
     
     private RecipeService recipeService;
-    private ImageService imageService;
 
     public RecipeController(RecipeService recipeService, ImageService imageService) {
         this.recipeService = recipeService;
-        this.imageService = imageService;
     }
 
-    // ####################################################################################################################
-    // ##############################                   RECIPES                              ##############################
-    // ####################################################################################################################
-
-    @GetMapping
-    (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity getAllRecipes(
-        @RequestParam(required = false, defaultValue = "0") Integer offset,
-        @RequestParam(required = false, defaultValue = "100") Integer limit, // Welche DEFAULT PARAMS?!
-        @RequestParam(required = false) String[] sort,
-        @RequestParam(required = false, defaultValue = "asc") String dir) {
-
-        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, dir);
+    @GetMapping()
+    public ResponseEntity getAllFilteredRecipes(
+        @And({
+            @Spec(path = "title", spec = Equal.class),
+            @Spec(path = "subTitle", spec = Equal.class),
+            @Spec(path = "description", spec = Equal.class),
+            @Spec(path = "category", spec = Equal.class),
+            @Spec(path = "calories", spec = Equal.class),
+            @Spec(path = "levelOfDifficulty", spec = Equal.class),
+            @Spec(path = "workingTimeInSeconds", spec = Equal.class),
+            @Spec(path = "cookingTimeInSeconds", spec = Equal.class),
+            @Spec(path = "restingTimeInSeconds", spec = Equal.class)
+            }) Specification<Recipe> recipeSpec,
+            @RequestParam(required = false, defaultValue = "0") Integer offset,
+            @RequestParam(required = false, defaultValue = "20") Integer limit, 
+            @RequestParam(required = false) String[] sort,
+            @RequestParam(required = false, defaultValue = "asc") String dir ) {
+        
+        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, dir, recipeSpec);
 
         if (recipes != null) {
             return ResponseEntity.ok(recipes);
