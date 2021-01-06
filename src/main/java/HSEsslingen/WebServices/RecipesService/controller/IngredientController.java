@@ -34,12 +34,12 @@ public class IngredientController {
     @GetMapping
     (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity getAllImages(
-        @RequestParam(required = false, defaultValue = "0") Integer page,
-        @RequestParam(required = false, defaultValue = "100") Integer size, // Welche DEFAULT PARAMS?!
+        @RequestParam(required = false, defaultValue = "0") Integer offset,
+        @RequestParam(required = false, defaultValue = "100") Integer limit, // Welche DEFAULT PARAMS?!
         @RequestParam(required = false) String[] sort,
         @RequestParam(required = false, defaultValue = "asc") String dir) {
 
-        CollectionModel<IngredientDTO> images = ingredientService.findAll(page, size, sort, dir);
+        CollectionModel<IngredientDTO> images = ingredientService.findAll(offset, limit, sort, dir);
 
         if (images != null) {
             return ResponseEntity.ok(images);

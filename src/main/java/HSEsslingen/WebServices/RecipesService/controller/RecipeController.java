@@ -45,12 +45,12 @@ public class RecipeController {
     @GetMapping
     (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity getAllRecipes(
-        @RequestParam(required = false, defaultValue = "0") Integer page,
-        @RequestParam(required = false, defaultValue = "100") Integer size, // Welche DEFAULT PARAMS?!
+        @RequestParam(required = false, defaultValue = "0") Integer offset,
+        @RequestParam(required = false, defaultValue = "100") Integer limit, // Welche DEFAULT PARAMS?!
         @RequestParam(required = false) String[] sort,
         @RequestParam(required = false, defaultValue = "asc") String dir) {
 
-        CollectionModel<RecipeDTO> recipes = recipeService.findAll(page, size, sort, dir);
+        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, dir);
 
         if (recipes != null) {
             return ResponseEntity.ok(recipes);
@@ -121,33 +121,5 @@ public class RecipeController {
         }
     }
 
-
-    // ####################################################################################################################
-    // ##############################                   RECIPES/IMAGES                       ##############################
-    // ####################################################################################################################
-
-    // Darf nur noch die IDs oder Links zurück liefern, anstatt zusätzliche Infos?!
-    // " /recipes/.../images wäre nur hilfreich, wenn Du
-    // nicht nur IDs lieferst, sondern noch viel mehr Informationen, die man bei /recipes/2
-    // nicht immer komplett mit abfragen möchte.""
-    @GetMapping("/{recipeId}/images")
-    public ResponseEntity getRecipeImagesByRecipeUUID(@PathVariable String recipeId) {
-        CollectionModel<ImageDTO> images = recipeService.findRecipeImagesByUUID(recipeId);
-        if(images != null) return ResponseEntity.ok(images);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    // ####################################################################################################################
-    // ##############################                   RECIPES/INGREDIENTS                  ##############################
-    // ####################################################################################################################
-
-    @GetMapping("/{id}/ingredients")
-    public ResponseEntity getRecipeIngredientsByRecipeUUID(@PathVariable String id) {
-        CollectionModel<IngredientDTO> ingredients = recipeService.findRecipeIngredientsByUUID(id);
-        if(ingredients != null) return ResponseEntity.ok(ingredients);
-
-        return ResponseEntity.noContent().build();
-    }
 
 }
