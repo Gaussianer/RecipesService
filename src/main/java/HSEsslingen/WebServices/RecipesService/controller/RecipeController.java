@@ -1,5 +1,7 @@
 package HSEsslingen.WebServices.RecipesService.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -50,11 +52,14 @@ public class RecipeController {
             }) Specification<Recipe> recipeSpec,
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
-            @RequestParam(required = false) String[] sort,
-            @RequestParam(required = false, defaultValue = "asc") String dir ) {
+            @RequestParam(required = false) String sort,
+            HttpServletRequest request
+            ) {
         
-        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, dir, recipeSpec);
-
+        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, recipeSpec);
+                System.out.println("#######################################################");
+                System.out.println(request.getRequestURI());
+                System.out.println("#######################################################");
         if (recipes != null) {
             return ResponseEntity.ok(recipes);
         }

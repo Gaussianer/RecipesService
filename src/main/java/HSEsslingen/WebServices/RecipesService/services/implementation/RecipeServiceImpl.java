@@ -48,15 +48,14 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String[] sort, String dir, Specification<Recipe> recipeSpec) {
-        Sort.Direction direction;
+    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String sort, Specification<Recipe> recipeSpec) {
         PageRequest pageRequest;
 
         if(sort == null) {
             pageRequest = PageRequest.of(offset, limit);
         } else {
-            direction = serviceHelper.getSortDirection(dir);
-            pageRequest = PageRequest.of(offset, limit, Sort.by(direction, sort));
+            List<Sort.Order> sortOrder = serviceHelper.getSortOrder(sort);
+            pageRequest = PageRequest.of(offset, limit, Sort.by(sortOrder));
         }
         Page<Recipe> recipes = recipeRepository.findAll(recipeSpec, pageRequest);
         if(! CollectionUtils.isEmpty(recipes.getContent())) {
@@ -64,33 +63,6 @@ public class RecipeServiceImpl implements RecipeService {
         }
         return null;
     }
-
-    // @Override
-    // public CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir) {
-    //     PageRequest pageRequest;
-    //     Sort.Direction direction;
-
-    //     if(sort == null) {
-    //         pageRequest = PageRequest.of(page, size);
-    //     }
-    //     else {
-    //         if(dir.equalsIgnoreCase("asc")) {
-    //             direction = Sort.Direction.ASC; 
-    //         }
-    //         else {
-    //             direction = Sort.Direction.DESC;
-    //         }
-    //         pageRequest = PageRequest.of(page, size, Sort.by(direction, sort));
-            
-
-    //     }
-    //     Page<Recipe> recipes = recipeRepository.findAll(pageRequest);
-
-    //     if(! CollectionUtils.isEmpty(recipes.getContent())) {
-    //         return pagedResourcesAssembler.toModel(recipes, recipeAssembler);
-    //     }
-    //     return null;
-    // }
 
     @Override
     public RecipeDTO findByUUID(String uuid) {

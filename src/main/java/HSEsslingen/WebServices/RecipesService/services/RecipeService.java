@@ -12,7 +12,7 @@ public interface RecipeService {
 
     // CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir);
 
-    CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir, Specification<Recipe> recipeSpec);
+    CollectionModel<RecipeDTO> findAll(int page, int size, String sort, Specification<Recipe> recipeSpec);
     
     CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid);
 
