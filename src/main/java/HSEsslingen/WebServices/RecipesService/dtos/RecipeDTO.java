@@ -6,12 +6,15 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 @Relation(collectionRelation = "recipes")
 @Data
 @AllArgsConstructor
+@JsonFilter(value = "recipeFilter")
 public class RecipeDTO extends RepresentationModel<RecipeDTO> {
 
     private String id;

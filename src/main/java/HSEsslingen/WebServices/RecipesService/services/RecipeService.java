@@ -18,7 +18,7 @@ public interface RecipeService {
 
     CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid);
 
-    RecipeDTO findByUUID(String uuid);
+    RecipeDTO findByUUID(String uuid, String[] fields);
 
     RecipeDTO insert(Recipe recipe);
 

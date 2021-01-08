@@ -2,12 +2,17 @@ package HSEsslingen.WebServices.RecipesService.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,29 +58,46 @@ public class RecipeController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
             @RequestParam(required = false) String sort,
-            HttpServletRequest request
-            ) {
-        
+            @RequestParam(required = false) String[] fields,
+            HttpServletRequest request ) {
+
         CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, recipeSpec);
-                System.out.println("#######################################################");
-                System.out.println(request.getRequestURI());
-                System.out.println("#######################################################");
-        if (recipes != null) {
-            return ResponseEntity.ok(recipes);
-        }
-        return ResponseEntity.noContent().build();
+        
+        if(fields != null) {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields));
+            MappingJacksonValue mapper = new MappingJacksonValue(recipes);
+            mapper.setFilters(filterProvider);
+            if(recipes != null) {
+                return ResponseEntity.ok(mapper);
+            }
+            return ResponseEntity.notFound().build();
+            } 
+    
+            if(recipes != null) {
+                return ResponseEntity.ok(recipes);
+            }
+            return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity getRecipeByUUID(@PathVariable String recipeId) {
+    public ResponseEntity getRecipeByUUID(@PathVariable String recipeId, @RequestParam(required = false) String[] fields) {
 
-        RecipeDTO recipeDTO = recipeService.findByUUID(recipeId);
-        if (recipeDTO == null) {
-            return ResponseEntity.notFound().build();
+        RecipeDTO recipeDTO = recipeService.findByUUID(recipeId, fields);
+        if(fields != null) {
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields));
+        MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
+        mapper.setFilters(filterProvider);
+        if(recipeDTO != null) {
+            return ResponseEntity.ok(mapper);
         }
-        return ResponseEntity.ok(recipeDTO);
+        return ResponseEntity.notFound().build();
+        } 
 
+        if(recipeDTO != null) {
+            return ResponseEntity.ok(recipeDTO);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -112,7 +134,6 @@ public class RecipeController {
         }
     }
 
-    
     @PutMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {

@@ -42,7 +42,35 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
             for(Image image : recipeEntity.getImages()){
             recipeDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(image.getUuid())).withRel("images"));
         }
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid())).withSelfRel());
+        String[] tempFields = {};
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid(), tempFields)).withSelfRel());
+        return recipeDTO;
+    }
+
+    public RecipeDTO toModel(Recipe recipeEntity, String[] fields) {
+                    
+        RecipeDTO recipeDTO = new RecipeDTO(
+            recipeEntity.getUuid(), 
+            recipeEntity.getTitle(),
+            recipeEntity.getSubTitle(),
+            recipeEntity.getDescription(),
+            recipeEntity.getCategory(),
+            recipeEntity.getServings(),
+            recipeEntity.getCalories(),
+            recipeEntity.getLevelOfDifficulty(),
+            recipeEntity.getWorkingTimeInSeconds(),
+            recipeEntity.getCookingTimeInSeconds(),
+            recipeEntity.getRestingTimeInSeconds()
+            );
+
+        for(Ingredient ingredient : recipeEntity.getIngredients()){
+            recipeDTO.add(linkTo(methodOn(IngredientController.class).getIngredientByUUID(ingredient.getUuid())).withRel("ingredients"));
+        }
+
+            for(Image image : recipeEntity.getImages()){
+            recipeDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(image.getUuid())).withRel("images"));
+        }
+        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid(), fields)).withSelfRel());
         return recipeDTO;
     }
 }

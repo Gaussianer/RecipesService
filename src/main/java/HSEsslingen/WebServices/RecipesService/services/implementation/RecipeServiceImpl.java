@@ -65,9 +65,11 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeDTO findByUUID(String uuid) {
+    public RecipeDTO findByUUID(String uuid, String[] fields) {
         Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
-        if(recipe != null) {
+        if(recipe != null && fields != null) {
+            return recipeAssembler.toModel(recipe, fields);
+        } else if (recipe != null) {
             return recipeAssembler.toModel(recipe);
         }
         return null;
@@ -128,15 +130,6 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
         boolean wasRecipeDeleted = false;
         if(recipe != null) {
-
-            recipe.getImages().forEach(image -> {
-                image.setIngredient(null);
-            });
-
-            // recipe.getIngredients().forEach(ingredient -> {
-            //     ingredientRepository.deleteById(ingredient.getId());
-            // });
-
             recipeRepository.deleteById(recipe.getId());
             wasRecipeDeleted = true;
         }
