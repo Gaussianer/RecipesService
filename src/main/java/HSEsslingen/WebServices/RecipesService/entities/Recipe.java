@@ -54,13 +54,13 @@ public class Recipe implements Serializable {
     private String levelOfDifficulty;
 
     @Column(name = "working_time_in_seconds")
-    private long workingTimeInSeconds;
+    private Long workingTimeInSeconds;
 
     @Column(name = "cooking_time_in_seconds")
-    private long cookingTimeInSeconds;
+    private Long cookingTimeInSeconds;
 
     @Column(name = "resting_time_in_seconds")
-    private long restingTimeInSeconds;
+    private Long restingTimeInSeconds;
 
     @OneToMany(mappedBy = "recipe", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude

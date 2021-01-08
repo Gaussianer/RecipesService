@@ -126,6 +126,49 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Transactional
     @Override
+    public RecipeDTO updateByUUID(String uuid, Recipe updatedRecipe) {
+        Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElse(null);
+        if (oldRecipe != null && updatedRecipe != null) {
+            recipeRepository.findById(oldRecipe.getId())
+            .map(recipe -> {
+                if(updatedRecipe.getTitle() != null) {
+                    recipe.setTitle(updatedRecipe.getTitle());
+                }
+                if(updatedRecipe.getSubTitle() != null) {
+                    recipe.setSubTitle(updatedRecipe.getSubTitle());
+                }
+                if(updatedRecipe.getDescription() != null) {
+                    recipe.setDescription(updatedRecipe.getDescription());
+                }
+                if(updatedRecipe.getCategory() != null) {
+                    recipe.setCategory(updatedRecipe.getCategory());
+                }
+                if(updatedRecipe.getServings() != null) {
+                    recipe.setServings(updatedRecipe.getServings());
+                }
+                if(updatedRecipe.getCalories() != null) {
+                    recipe.setCalories(updatedRecipe.getCalories());
+                }
+                if(updatedRecipe.getLevelOfDifficulty() != null) {
+                    recipe.setLevelOfDifficulty(updatedRecipe.getLevelOfDifficulty());
+                }
+                if(updatedRecipe.getWorkingTimeInSeconds() != null) {
+                    recipe.setWorkingTimeInSeconds(updatedRecipe.getWorkingTimeInSeconds());
+                }
+                if(updatedRecipe.getCookingTimeInSeconds() != null) {
+                    recipe.setCookingTimeInSeconds(updatedRecipe.getCookingTimeInSeconds());
+                }
+                if(updatedRecipe.getRestingTimeInSeconds() != null) {
+                    recipe.setRestingTimeInSeconds(updatedRecipe.getRestingTimeInSeconds());
+                }
+                return recipeAssembler.toModel(recipeRepository.save(recipe));
+            });
+        }
+        return null;
+    }
+
+    @Transactional
+    @Override
     public boolean removeByUUID(String uuid) {
         Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
         boolean wasRecipeDeleted = false;

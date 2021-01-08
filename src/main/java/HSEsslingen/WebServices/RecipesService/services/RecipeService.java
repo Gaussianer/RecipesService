@@ -24,5 +24,7 @@ public interface RecipeService {
 
     RecipeDTO replaceByUUID(String uuid, Recipe recipe);
 
+    RecipeDTO updateByUUID(String uuid, Recipe recipe);
+
     boolean removeByUUID(String uuid);
 }

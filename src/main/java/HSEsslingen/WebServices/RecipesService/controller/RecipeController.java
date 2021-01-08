@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,7 +44,7 @@ public class RecipeController {
     }
 
     @GetMapping()
-    public ResponseEntity getAllFilteredRecipes(
+    public ResponseEntity<?> getAllFilteredRecipes(
         @And({
             @Spec(path = "title", spec = Equal.class),
             @Spec(path = "subTitle", spec = Equal.class),
@@ -77,11 +78,12 @@ public class RecipeController {
                 return ResponseEntity.ok(recipes);
             }
             return ResponseEntity.noContent().build();
+
     }
 
     @GetMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity getRecipeByUUID(@PathVariable String recipeId, @RequestParam(required = false) String[] fields) {
+    public ResponseEntity<?> getRecipeByUUID(@PathVariable String recipeId, @RequestParam(required = false) String[] fields) {
 
         RecipeDTO recipeDTO = recipeService.findByUUID(recipeId, fields);
         if(fields != null) {
@@ -101,7 +103,7 @@ public class RecipeController {
     }
 
     @PostMapping
-    public ResponseEntity addRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<?> addRecipe(@RequestBody Recipe recipe) {
         try {
             if (recipe != null) {
                 RecipeDTO recipeDTO = recipeService.insert(recipe);
@@ -117,7 +119,7 @@ public class RecipeController {
 
     @DeleteMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity removeRecipeByUUID(@PathVariable String recipeId) {
+    public ResponseEntity<?> removeRecipeByUUID(@PathVariable String recipeId) {
         try {
             if (recipeId != null && recipeId != "") {
                 boolean recipeWasDeleted = recipeService.removeByUUID(recipeId);
@@ -136,7 +138,7 @@ public class RecipeController {
 
     @PutMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {
+    public ResponseEntity<?> replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {
         try {
             if (recipeId != null && recipe != null) {
                 RecipeDTO recipeDTO = recipeService.replaceByUUID(recipeId, recipe);
@@ -150,5 +152,19 @@ public class RecipeController {
         }
     }
 
-
+    @PatchMapping
+    (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    public ResponseEntity<?> updateRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {
+        try {
+            if (recipeId != null) {
+                RecipeDTO recipeDTO = recipeService.updateByUUID(recipeId, recipe);
+                return ResponseEntity.ok(recipeDTO);
+            }
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
