@@ -5,9 +5,7 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -16,7 +14,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,14 +44,12 @@ import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
 public class RecipeController {
     
     private RecipeService recipeService;
-    private static final String APPLICATION_HAL_JSON_VALUE = "application/hal+json";
 
     public RecipeController(RecipeService recipeService, ImageService imageService) {
         this.recipeService = recipeService;
     }
 
-    @GetMapping 
-    (produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE, APPLICATION_HAL_JSON_VALUE })
+    @GetMapping()
     public ResponseEntity<?> getAllFilteredRecipes(
         @And({
             @Spec(path = "title", spec = Equal.class),
@@ -77,8 +72,7 @@ public class RecipeController {
         
         if(fields.equals("")) {
             if(recipes != null) {
-                MappingJacksonValue mapper = new MappingJacksonValue(recipes);
-                return ResponseEntity.ok(mapper);
+                return ResponseEntity.ok(recipes);
             }
             return ResponseEntity.notFound().build();
         } else {
@@ -104,7 +98,7 @@ public class RecipeController {
         }
     }
 
-    @GetMapping 
+    @GetMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<?> getRecipeByUUID(@PathVariable String recipeId, @RequestParam(required = false) String[] fields) {
 
@@ -130,8 +124,7 @@ public class RecipeController {
         try {
             if (recipe != null) {
                 RecipeDTO recipeDTO = recipeService.insert(recipe);
-                MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
-                return ResponseEntity.created(recipeDTO.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(mapper);
+                return ResponseEntity.created(recipeDTO.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(recipeDTO);
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -166,8 +159,7 @@ public class RecipeController {
         try {
             if (recipeId != null && recipe != null) {
                 RecipeDTO recipeDTO = recipeService.replaceByUUID(recipeId, recipe);
-                MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
-                return ResponseEntity.ok(mapper);
+                return ResponseEntity.ok(recipeDTO);
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -183,8 +175,7 @@ public class RecipeController {
         try {
             if (recipeId != null) {
                 RecipeDTO recipeDTO = recipeService.updateByUUID(recipeId, recipe);
-                MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
-                return ResponseEntity.ok(mapper);
+                return ResponseEntity.ok(recipeDTO);
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
