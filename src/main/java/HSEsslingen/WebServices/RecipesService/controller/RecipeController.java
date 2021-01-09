@@ -1,10 +1,15 @@
 package HSEsslingen.WebServices.RecipesService.controller;
 
+import java.util.HashMap;
+
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,26 +65,43 @@ public class RecipeController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String[] fields,
-            HttpServletRequest request ) {
+            @RequestParam(required = false, defaultValue = "") String fields,
+            @RequestHeader(value = "Accept", required = false) String acceptHeader,
+            HttpServletRequest request ) throws JsonProcessingException {
 
         CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, recipeSpec);
         
-        if(fields != null) {
-            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields));
+        if(!fields.contains("")) {
+            if(recipes != null) {
+                return ResponseEntity.ok(recipes);
+            }
+            return ResponseEntity.notFound().build();
+        }
+        String[] tempFields;
+        if(fields.equals("")){
+        String[] allFields ={"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds"};
+        tempFields = allFields;
+        } else {
+            tempFields = fields.split(",");
+        }
+        if(acceptHeader.equals(MediaType.APPLICATION_XML_VALUE)) {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
+            XmlMapper xmlMapper = new XmlMapper();
+            String xml = xmlMapper.writer(filterProvider).writeValueAsString(recipes);
+            if(recipes != null) {
+                return ResponseEntity.ok(xml);
+            }
+            return ResponseEntity.notFound().build();
+        } 
+        else {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
             MappingJacksonValue mapper = new MappingJacksonValue(recipes);
             mapper.setFilters(filterProvider);
             if(recipes != null) {
                 return ResponseEntity.ok(mapper);
             }
             return ResponseEntity.notFound().build();
-            } 
-    
-            if(recipes != null) {
-                return ResponseEntity.ok(recipes);
-            }
-            return ResponseEntity.noContent().build();
-
+        } 
     }
 
     @GetMapping
