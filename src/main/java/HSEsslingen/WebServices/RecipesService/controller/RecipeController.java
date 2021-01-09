@@ -65,37 +65,37 @@ public class RecipeController {
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false, defaultValue = "") String fields,
+            @RequestParam(required = false,defaultValue = "") String fields,
             HttpServletRequest request ) throws JsonProcessingException {
 
         CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, recipeSpec);
+
+        String[] tempFields;
+        if(fields.equals("")){
+            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "links"}; 
+            tempFields = tempPropertys;
+        } else {
+                tempFields = fields.split(",");
+        }
         
-        if(fields.equals("")) {
+        if(request.getHeader("Accept").equals(MediaType.APPLICATION_XML_VALUE)) {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
+            XmlMapper xmlMapper = new XmlMapper();
+            String xml = xmlMapper.writer(filterProvider).writeValueAsString(recipes);
             if(recipes != null) {
-                return ResponseEntity.ok(recipes);
+                return ResponseEntity.ok(xml);
+            }
+                return ResponseEntity.notFound().build();
+        } 
+        else {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
+            MappingJacksonValue mapper = new MappingJacksonValue(recipes);
+            mapper.setFilters(filterProvider);
+            if(recipes != null) {
+                return ResponseEntity.ok(mapper);
             }
             return ResponseEntity.notFound().build();
-        } else {
-            String[] tempFields = fields.split(",");
-            if(request.getHeader("Accept").equals(MediaType.APPLICATION_XML_VALUE)) {
-                FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
-                XmlMapper xmlMapper = new XmlMapper();
-                String xml = xmlMapper.writer(filterProvider).writeValueAsString(recipes);
-                if(recipes != null) {
-                    return ResponseEntity.ok(xml);
-                }
-                return ResponseEntity.notFound().build();
-            } 
-            else {
-                FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
-                MappingJacksonValue mapper = new MappingJacksonValue(recipes);
-                mapper.setFilters(filterProvider);
-                if(recipes != null) {
-                    return ResponseEntity.ok(mapper);
-                }
-                return ResponseEntity.notFound().build();
-            } 
-        }
+        } 
     }
 
     @GetMapping
