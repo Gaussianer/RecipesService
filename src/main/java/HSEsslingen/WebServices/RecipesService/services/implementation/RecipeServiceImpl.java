@@ -20,8 +20,6 @@ import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
 import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
-import HSEsslingen.WebServices.RecipesService.repositories.ImageRepository;
-import HSEsslingen.WebServices.RecipesService.repositories.IngredientRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.RecipeRepository;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
 import HSEsslingen.WebServices.RecipesService.services.helper.ServiceHelper;
