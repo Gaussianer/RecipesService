@@ -1,11 +1,8 @@
 package HSEsslingen.WebServices.RecipesService.controller;
 
-import java.util.HashMap;
-
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,7 +46,7 @@ public class RecipeController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getAllFilteredRecipes(
+    public ResponseEntity<?> getAllRecipes(
         @And({
             @Spec(path = "title", spec = Equal.class),
             @Spec(path = "subTitle", spec = Equal.class),
@@ -68,7 +64,7 @@ public class RecipeController {
             @RequestParam(required = false,defaultValue = "") String fields,
             HttpServletRequest request ) throws JsonProcessingException {
 
-        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, recipeSpec);
+        CollectionModel<RecipeDTO> recipes = recipeService.findAll(offset, limit, sort, fields, recipeSpec);
 
         String[] tempFields;
         if(fields.equals("")){
@@ -100,23 +96,38 @@ public class RecipeController {
 
     @GetMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<?> getRecipeByUUID(@PathVariable String recipeId, @RequestParam(required = false) String[] fields) {
+    public ResponseEntity<?> getRecipeByUUID(@PathVariable String recipeId, 
+    @RequestParam(required = false,defaultValue = "") String fields, 
+    HttpServletRequest request) throws JsonProcessingException {
 
         RecipeDTO recipeDTO = recipeService.findByUUID(recipeId, fields);
-        if(fields != null) {
-        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields));
-        MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
-        mapper.setFilters(filterProvider);
-        if(recipeDTO != null) {
-            return ResponseEntity.ok(mapper);
-        }
-        return ResponseEntity.notFound().build();
-        } 
 
-        if(recipeDTO != null) {
-            return ResponseEntity.ok(recipeDTO);
+        String[] tempFields;
+        if(fields.equals("")) {
+            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "links"}; 
+            tempFields = tempPropertys;
+        } else {
+            tempFields = fields.split(",");
         }
-        return ResponseEntity.notFound().build();
+        
+        if(request.getHeader("Accept").equals(MediaType.APPLICATION_XML_VALUE)) {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
+            XmlMapper xmlMapper = new XmlMapper();
+            String xml = xmlMapper.writer(filterProvider).writeValueAsString(recipeDTO);
+            if(recipeDTO != null) {
+                return ResponseEntity.ok(xml);
+            }
+                return ResponseEntity.notFound().build();
+        } 
+        else {
+            FilterProvider filterProvider = new SimpleFilterProvider().addFilter("recipeFilter", SimpleBeanPropertyFilter.filterOutAllExcept(tempFields));
+            MappingJacksonValue mapper = new MappingJacksonValue(recipeDTO);
+            mapper.setFilters(filterProvider);
+            if(recipeDTO != null) {
+                return ResponseEntity.ok(mapper);
+            }
+            return ResponseEntity.notFound().build();
+        } 
     }
 
     @PostMapping
@@ -140,7 +151,7 @@ public class RecipeController {
         try {
             if (recipeId != null && recipeId != "") {
                 boolean recipeWasDeleted = recipeService.removeByUUID(recipeId);
-                if (!recipeWasDeleted){
+                if (!recipeWasDeleted) {
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 }
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);

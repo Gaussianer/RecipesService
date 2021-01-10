@@ -35,7 +35,7 @@ public class IngredientController {
     (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity getAllImages(
         @RequestParam(required = false, defaultValue = "0") Integer offset,
-        @RequestParam(required = false, defaultValue = "100") Integer limit, // Welche DEFAULT PARAMS?!
+        @RequestParam(required = false, defaultValue = "100") Integer limit,
         @RequestParam(required = false) String[] sort,
         @RequestParam(required = false, defaultValue = "asc") String dir) {
 

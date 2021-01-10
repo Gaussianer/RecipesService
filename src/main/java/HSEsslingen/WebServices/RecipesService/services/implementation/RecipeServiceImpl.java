@@ -3,6 +3,8 @@ package HSEsslingen.WebServices.RecipesService.services.implementation;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -46,7 +48,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String sort, Specification<Recipe> recipeSpec) {
+    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String sort, String fields, Specification<Recipe> recipeSpec) {
         PageRequest pageRequest;
 
         if(sort == null) {
@@ -63,12 +65,15 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeDTO findByUUID(String uuid, String[] fields) {
+    public RecipeDTO findByUUID(String uuid, String fields){
         Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
-        if(recipe != null && fields != null) {
-            return recipeAssembler.toModel(recipe, fields);
-        } else if (recipe != null) {
-            return recipeAssembler.toModel(recipe);
+        if (recipe != null) {
+            try {
+				return recipeAssembler.toModel(recipe, fields);
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         return null;
     }

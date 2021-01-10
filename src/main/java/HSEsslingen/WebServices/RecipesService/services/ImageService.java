@@ -5,7 +5,6 @@ import org.springframework.hateoas.CollectionModel;
 import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
-import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 
 public interface ImageService {
 
