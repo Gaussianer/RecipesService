@@ -45,7 +45,8 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping()
+    @GetMapping
+    (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<?> getAllRecipes(
         @And({
             @Spec(path = "title", spec = Equal.class),
