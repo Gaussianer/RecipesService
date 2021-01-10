@@ -65,15 +65,10 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeDTO findByUUID(String uuid, String fields){
+    public RecipeDTO findByUUID(String uuid){
         Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
         if (recipe != null) {
-            try {
-				return recipeAssembler.toModel(recipe, fields);
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			return recipeAssembler.toModel(recipe);
         }
         return null;
     }

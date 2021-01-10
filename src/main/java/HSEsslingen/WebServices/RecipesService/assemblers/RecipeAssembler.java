@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import HSEsslingen.WebServices.RecipesService.controller.ImageController;
 import HSEsslingen.WebServices.RecipesService.controller.IngredientController;
-import HSEsslingen.WebServices.RecipesService.controller.RecipeController;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
@@ -14,6 +13,8 @@ import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import org.springframework.hateoas.Link;
 
 @Component
 public class RecipeAssembler implements RepresentationModelAssembler<Recipe, RecipeDTO> {
@@ -39,38 +40,11 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
             recipeDTO.add(linkTo(methodOn(IngredientController.class).getIngredientByUUID(ingredient.getUuid())).withRel("ingredients"));
         }
 
-            for(Image image : recipeEntity.getImages()){
+        for(Image image : recipeEntity.getImages()){
             recipeDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(image.getUuid())).withRel("images"));
         }
-        String[] tempFields = {};
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid(), tempFields)).withSelfRel());
-        return recipeDTO;
-    }
-
-    public RecipeDTO toModel(Recipe recipeEntity, String[] fields) {
-                    
-        RecipeDTO recipeDTO = new RecipeDTO(
-            recipeEntity.getUuid(), 
-            recipeEntity.getTitle(),
-            recipeEntity.getSubTitle(),
-            recipeEntity.getDescription(),
-            recipeEntity.getCategory(),
-            recipeEntity.getServings(),
-            recipeEntity.getCalories(),
-            recipeEntity.getLevelOfDifficulty(),
-            recipeEntity.getWorkingTimeInSeconds(),
-            recipeEntity.getCookingTimeInSeconds(),
-            recipeEntity.getRestingTimeInSeconds()
-            );
-
-        for(Ingredient ingredient : recipeEntity.getIngredients()){
-            recipeDTO.add(linkTo(methodOn(IngredientController.class).getIngredientByUUID(ingredient.getUuid())).withRel("ingredients"));
-        }
-
-            for(Image image : recipeEntity.getImages()){
-            recipeDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(image.getUuid())).withRel("images"));
-        }
-        recipeDTO.add(linkTo(methodOn(RecipeController.class).getRecipeByUUID(recipeEntity.getUuid(), fields)).withSelfRel());
+        
+        recipeDTO.add(new Link("http://localhost:8080/recipes/" + recipeEntity.getUuid()));
         return recipeDTO;
     }
 }

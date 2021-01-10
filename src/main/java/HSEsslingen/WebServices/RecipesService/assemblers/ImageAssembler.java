@@ -13,6 +13,8 @@ import HSEsslingen.WebServices.RecipesService.entities.Image;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import org.springframework.hateoas.Link;
+
 @Component
 public class ImageAssembler implements RepresentationModelAssembler<Image, ImageDTO> {
 
@@ -27,24 +29,7 @@ public class ImageAssembler implements RepresentationModelAssembler<Image, Image
             // Wenn Ingredient ausgebaut wird, dann hier noch wie bei Recipe ausbessern
             // imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(ImageController.class).findImageRecipeByUUID(imageEntity.getUuid())).withRel("recipe")); 
             } else if (imageEntity.getRecipe() != null) { 
-            String[] tempFields = {};
-            imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(RecipeController.class).getRecipeByUUID(imageEntity.getRecipe().getUuid(), tempFields)).withRel("recipe"));
-            }
-            imageDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(imageEntity.getUuid())).withSelfRel());
-        return imageDTO;
-    }
-
-    public ImageDTO toModel(Image imageEntity, String[] fields) {
-        ImageDTO imageDTO = new ImageDTO(
-            imageEntity.getUuid(), 
-            imageEntity.getName(),
-            imageEntity.getUrl()
-            );
-            if(imageEntity.getIngredient() != null) {
-            // Wenn Ingredient ausgebaut wird, dann hier noch wie bei Recipe ausbessern
-            // imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(ImageController.class).findImageRecipeByUUID(imageEntity.getUuid())).withRel("recipe")); 
-            } else if (imageEntity.getRecipe() != null) {
-            imageDTO.add(WebMvcLinkBuilder.linkTo(methodOn(RecipeController.class).getRecipeByUUID(imageEntity.getRecipe().getUuid(), fields)).withRel("recipe"));
+            imageDTO.add(new Link("http://localhost:8080/recipes/" + imageEntity.getRecipe().getUuid()));
             }
             imageDTO.add(linkTo(methodOn(ImageController.class).getImageByUUID(imageEntity.getUuid())).withSelfRel());
         return imageDTO;

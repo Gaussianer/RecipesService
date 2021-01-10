@@ -100,7 +100,7 @@ public class RecipeController {
     @RequestParam(required = false,defaultValue = "") String fields, 
     HttpServletRequest request) throws JsonProcessingException {
 
-        RecipeDTO recipeDTO = recipeService.findByUUID(recipeId, fields);
+        RecipeDTO recipeDTO = recipeService.findByUUID(recipeId);
 
         String[] tempFields;
         if(fields.equals("")) {
