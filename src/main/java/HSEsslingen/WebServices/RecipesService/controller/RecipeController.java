@@ -30,6 +30,10 @@ import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 import HSEsslingen.WebServices.RecipesService.services.ImageService;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -47,6 +51,7 @@ public class RecipeController {
 
     @GetMapping
     (produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @ApiOperation(value = "Get all recipes", notes = "This API delivers all recipes")
     public ResponseEntity<?> getAllRecipes(
         @And({
             @Spec(path = "title", spec = Equal.class),
@@ -58,7 +63,10 @@ public class RecipeController {
             @Spec(path = "workingTimeInSeconds", spec = Equal.class),
             @Spec(path = "cookingTimeInSeconds", spec = Equal.class),
             @Spec(path = "restingTimeInSeconds", spec = Equal.class)
-            }) Specification<Recipe> recipeSpec,
+            })  @Parameter(
+                name = "filtering",
+                in = ParameterIn.QUERY
+                )  Specification<Recipe> recipeSpec,
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
             @RequestParam(required = false) String sort,
@@ -69,7 +77,7 @@ public class RecipeController {
 
         String[] tempFields;
         if(fields.equals("")){
-            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "links"}; 
+            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "images", "ingredients", "links"}; 
             tempFields = tempPropertys;
         } else {
                 tempFields = fields.split(",");
@@ -105,7 +113,7 @@ public class RecipeController {
 
         String[] tempFields;
         if(fields.equals("")) {
-            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "links"}; 
+            String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "images", "ingredients", "links"}; 
             tempFields = tempPropertys;
         } else {
             tempFields = fields.split(",");
@@ -132,7 +140,7 @@ public class RecipeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<?> addRecipe(@RequestBody RecipeDTO recipe) {
         try {
             if (recipe != null) {
                 RecipeDTO recipeDTO = recipeService.insert(recipe);
@@ -167,7 +175,7 @@ public class RecipeController {
 
     @PutMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<?> replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {
+    public ResponseEntity<?> replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody RecipeDTO recipe) {
         try {
             if (recipeId != null && recipe != null) {
                 RecipeDTO recipeDTO = recipeService.replaceByUUID(recipeId, recipe);
@@ -183,7 +191,7 @@ public class RecipeController {
 
     @PatchMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<?> updateRecipeByUUID(@PathVariable String recipeId, @RequestBody Recipe recipe) {
+    public ResponseEntity<?> updateRecipeByUUID(@PathVariable String recipeId, @RequestBody RecipeDTO recipe) {
         try {
             if (recipeId != null) {
                 RecipeDTO recipeDTO = recipeService.updateByUUID(recipeId, recipe);

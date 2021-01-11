@@ -10,18 +10,31 @@ import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.hateoas.Link;
 
 @Component
 public class RecipeAssembler implements RepresentationModelAssembler<Recipe, RecipeDTO> {
 
+
     @Override
     public RecipeDTO toModel(Recipe recipeEntity) {
                     
+        List<String> images = new ArrayList<>();
+        for(Image image : recipeEntity.getImages()){
+            images.add(image.getUuid());
+        }
+
+        List<String> ingredients = new ArrayList<>();
+        for(Ingredient ingredient : recipeEntity.getIngredients()){
+            ingredients.add(ingredient.getUuid());
+        }
+
         RecipeDTO recipeDTO = new RecipeDTO(
             recipeEntity.getUuid(), 
             recipeEntity.getTitle(),
@@ -33,7 +46,9 @@ public class RecipeAssembler implements RepresentationModelAssembler<Recipe, Rec
             recipeEntity.getLevelOfDifficulty(),
             recipeEntity.getWorkingTimeInSeconds(),
             recipeEntity.getCookingTimeInSeconds(),
-            recipeEntity.getRestingTimeInSeconds()
+            recipeEntity.getRestingTimeInSeconds(),
+            images,
+            ingredients
             );
 
         for(Ingredient ingredient : recipeEntity.getIngredients()){

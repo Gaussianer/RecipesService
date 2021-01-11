@@ -2,8 +2,11 @@ package HSEsslingen.WebServices.RecipesService.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -12,9 +15,13 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 @Relation(collectionRelation = "recipes")
+@JsonFilter(value = "recipeFilter")
 @Data
 @AllArgsConstructor
-@JsonFilter(value = "recipeFilter")
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class RecipeDTO extends RepresentationModel<RecipeDTO> {
 
     private String id;
@@ -25,8 +32,10 @@ public class RecipeDTO extends RepresentationModel<RecipeDTO> {
     private Integer servings;
     private Double calories;
     private String levelOfDifficulty;
-    private long workingTimeInSeconds;
-    private long cookingTimeInSeconds;
-    private long restingTimeInSeconds;
+    private Long workingTimeInSeconds;
+    private Long cookingTimeInSeconds;
+    private Long restingTimeInSeconds;
+    private List<String> images;
+    private List<String> ingredients;
     
 }

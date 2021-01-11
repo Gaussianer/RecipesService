@@ -80,11 +80,31 @@ public class Recipe implements Serializable {
         image.setRecipe(null);
     }
 
+    public void resetImage(Image image) {
+        image.setRecipe(null);
+    }
+
+    public void resetImageList() {
+        this.images = new ArrayList<>();
+    }
+
+    public void resetIngredient(Ingredient ingredient) {
+        ingredient.setRecipe(null);
+    }
+
+    public void resetIngredientList() {
+        this.ingredients = new ArrayList<>();
+    }
+
+
     public void addIngredient(Ingredient ingredient) {
+        ingredient.setRecipe(this);
         this.ingredients.add(ingredient);
     }
 
     public void removeIngredient(Ingredient ingredient) {
+        ingredient.setRecipe(null);
         this.ingredients.remove(ingredient);
     }
+
 }

@@ -20,11 +20,11 @@ public interface RecipeService {
 
     RecipeDTO findByUUID(String uuid);
 
-    RecipeDTO insert(Recipe recipe);
+    RecipeDTO insert(RecipeDTO recipe);
 
-    RecipeDTO replaceByUUID(String uuid, Recipe recipe);
+    RecipeDTO replaceByUUID(String uuid, RecipeDTO updatedRecipe);
 
-    RecipeDTO updateByUUID(String uuid, Recipe recipe);
+    RecipeDTO updateByUUID(String uuid, RecipeDTO updatedRecipe);
 
     boolean removeByUUID(String uuid);
 }
