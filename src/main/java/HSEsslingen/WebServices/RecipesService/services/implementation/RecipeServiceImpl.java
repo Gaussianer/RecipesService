@@ -1,10 +1,7 @@
 package HSEsslingen.WebServices.RecipesService.services.implementation;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +25,6 @@ import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 import HSEsslingen.WebServices.RecipesService.repositories.ImageRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.IngredientRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.RecipeRepository;
-import HSEsslingen.WebServices.RecipesService.services.ImageService;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
 import HSEsslingen.WebServices.RecipesService.services.helper.ServiceHelper;
 
