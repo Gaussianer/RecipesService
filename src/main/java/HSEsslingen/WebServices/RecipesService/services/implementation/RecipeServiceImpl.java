@@ -23,6 +23,7 @@ import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
+import HSEsslingen.WebServices.RecipesService.exceptions.MissingAttributeWhileCreatingRecipeException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundWithFilterAttributs;
 import HSEsslingen.WebServices.RecipesService.repositories.ImageRepository;
@@ -106,9 +107,14 @@ public class RecipeServiceImpl implements RecipeService {
         String uuid = UUID.randomUUID().toString();
         recipe.setUuid(uuid);
 
+        String[] missingAttributes = serviceHelper.getMissingRecipeAttributes(recipeDTO);
+        if(missingAttributes != null) {
+            throw new MissingAttributeWhileCreatingRecipeException(Recipe.class, missingAttributes);
+        }
+
         if(recipeDTO.getTitle() != null) {
             recipe.setTitle(recipeDTO.getTitle());
-        }
+        } 
         if(recipeDTO.getSubTitle() != null) {
             recipe.setSubTitle(recipeDTO.getSubTitle());
         }
@@ -136,20 +142,23 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeDTO.getRestingTimeInSeconds() != null) {
             recipe.setRestingTimeInSeconds(recipeDTO.getRestingTimeInSeconds());
         }
-        for(String imageUUID : recipeDTO.getImages()){
-            Image image = imageRepository.findByUuid(imageUUID).orElse(null);
-            
-            if(image != null){
-                recipe.addImage(image);
-            } 
+        if(!recipeDTO.getImages().isEmpty()){
+            for(String imageUUID : recipeDTO.getImages()){
+                Image image = imageRepository.findByUuid(imageUUID).orElse(null);
+                
+                if(image != null){
+                    recipe.addImage(image);
+                } 
+            }
         }
-
-        for(String ingredientUUID : recipeDTO.getIngredients()){
-            Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElse(null);
-
-            if(ingredient != null){
-                recipe.addIngredient(ingredient);
-            } 
+        if(!recipeDTO.getIngredients().isEmpty()){
+            for(String ingredientUUID : recipeDTO.getIngredients()){
+                Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElse(null);
+    
+                if(ingredient != null){
+                    recipe.addIngredient(ingredient);
+                } 
+            }
         }
     
         return recipeAssembler.toModel(recipeRepository.save(recipe));

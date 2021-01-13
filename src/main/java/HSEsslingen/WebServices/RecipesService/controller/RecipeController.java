@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -207,7 +208,7 @@ public class RecipeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addRecipe(@RequestBody RecipeDTO recipe) {
+    public ResponseEntity<?> addRecipe(@RequestBody @Valid RecipeDTO recipe) {
             if (recipe != null) {
                 RecipeDTO recipeDTO = recipeService.insert(recipe);
                 return ResponseEntity.created(recipeDTO.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(recipeDTO);
@@ -229,23 +230,22 @@ public class RecipeController {
 
     @PutMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<?> replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody RecipeDTO recipe) throws RecipeNotFoundException {
+    public ResponseEntity<?> replaceRecipeByUUID(@PathVariable String recipeId, @RequestBody  @Valid RecipeDTO recipe) throws RecipeNotFoundException {
             if (recipeId != null && recipe != null) {
                 RecipeDTO recipeDTO = recipeService.replaceByUUID(recipeId, recipe);
                 return ResponseEntity.ok(recipeDTO);
             }
-            // ERROR WERFEN
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @PatchMapping
     (value = "/{recipeId}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<?> updateRecipeByUUID(@PathVariable String recipeId, @RequestBody RecipeDTO recipe) {
+    public ResponseEntity<?> updateRecipeByUUID(@PathVariable String recipeId, @RequestBody  @Valid RecipeDTO recipe) {
             if (recipeId != null) {
                 RecipeDTO recipeDTO = recipeService.updateByUUID(recipeId, recipe);
                 return ResponseEntity.ok(recipeDTO);
             }
-            // ERROR WERFEN
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 }

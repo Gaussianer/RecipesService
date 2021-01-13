@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
+
 @Component
 public class ServiceHelper {
     
@@ -50,5 +52,40 @@ public class ServiceHelper {
         return sortOrder;
     }
 
+    public String[] getMissingRecipeAttributes(RecipeDTO recipeDTO){
+       List<String> missingAttributes = new ArrayList<>();
+        if(recipeDTO.getTitle() == null) {
+            missingAttributes.add("title");
+        }
+        if(recipeDTO.getDescription() == null) {
+            missingAttributes.add("description");
+        }
+        if(recipeDTO.getCategory() == null) {
+            missingAttributes.add("category");
+        }
+        if(recipeDTO.getServings() == null) {
+            missingAttributes.add("servings");
+        }
+        if(recipeDTO.getCalories() == null) {
+            missingAttributes.add("calories");
+        }
+        if(recipeDTO.getLevelOfDifficulty() == null) {
+            missingAttributes.add("levelOfDifficulty");
+        }
+        if(recipeDTO.getWorkingTimeInSeconds() == null) {
+            missingAttributes.add("workingTimeInSeconds");
+        }
+        if(recipeDTO.getCookingTimeInSeconds() == null) {
+            missingAttributes.add("cookingTimeInSeconds");
+        }
+        if(recipeDTO.getRestingTimeInSeconds() == null) {
+            missingAttributes.add("restingTimeInSeconds");
+        }
+        String[] determinedMissingAttributes = missingAttributes.toArray(new String[0]);
+        if(determinedMissingAttributes.length == 0) {
+            return null;
+        }
+        return determinedMissingAttributes;
+    }
 
 }

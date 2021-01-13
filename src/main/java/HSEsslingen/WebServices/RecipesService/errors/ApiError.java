@@ -24,7 +24,7 @@ public class ApiError {
     private LocalDateTime timestamp;
 
     private String type;
-    private HttpStatus status; // Bei ihm Integer
+    private Integer status; 
     private String errorCode;
     private String summary;
     private String details;
@@ -38,19 +38,19 @@ public class ApiError {
         timestamp = LocalDateTime.now();
     }
 
-    public ApiError(HttpStatus status) {
+    public ApiError(Integer status) {
         this();
         this.status = status;
     }
 
-    public ApiError(HttpStatus status, Throwable ex) {
+    public ApiError(Integer status, Throwable ex) {
         this();
         this.status = status;
         this.summary = "Unexpected error";
         this.details = ex.getLocalizedMessage();
     }
 
-    public ApiError(HttpStatus status, String summary, Throwable ex) {
+    public ApiError(Integer status, String summary, Throwable ex) {
         this();
         this.status = status;
         this.summary = summary;
