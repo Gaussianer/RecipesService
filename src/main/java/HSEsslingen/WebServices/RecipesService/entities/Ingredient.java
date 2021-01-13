@@ -52,7 +52,7 @@ public class Ingredient implements Serializable {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
     
-    @OneToMany(mappedBy = "ingredient", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "ingredient", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     private List<Image> images = new ArrayList<>();
 

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
-import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.services.ImageService;
 

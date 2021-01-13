@@ -1,5 +1,7 @@
 package HSEsslingen.WebServices.RecipesService.services;
 
+import java.util.HashMap;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.CollectionModel;
 
@@ -12,7 +14,7 @@ public interface RecipeService {
 
     // CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir);
 
-    CollectionModel<RecipeDTO> findAll(int page, int size, String sort, String fields, Specification<Recipe> recipeSpec);
+    CollectionModel<RecipeDTO> findAll(int page, int size, String sort, String fields, Specification<Recipe> recipeSpec, HashMap<String, String> specificationKeyValuePairs);
     
     CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid);
 
@@ -26,5 +28,5 @@ public interface RecipeService {
 
     RecipeDTO updateByUUID(String uuid, RecipeDTO updatedRecipe);
 
-    boolean removeByUUID(String uuid);
+    RecipeDTO removeByUUID(String uuid);
 }

@@ -1,5 +1,6 @@
 package HSEsslingen.WebServices.RecipesService.services.implementation;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +23,8 @@ import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
+import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundException;
+import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundWithFilterAttributs;
 import HSEsslingen.WebServices.RecipesService.repositories.ImageRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.IngredientRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.RecipeRepository;
@@ -40,7 +43,6 @@ public class RecipeServiceImpl implements RecipeService {
     private final PagedResourcesAssembler pagedResourcesAssembler;
     private final ServiceHelper serviceHelper;
 
-
     public RecipeServiceImpl(RecipeRepository recipeRepository, ImageRepository imageRepository, IngredientRepository ingredientRepository,RecipeAssembler recipeAssembler, 
     ImageAssembler imageAssembler, IngredientAssembler ingredientAssembler, PagedResourcesAssembler pagedResourcesAssembler, ServiceHelper serviceHelper) {
         this.recipeRepository = recipeRepository;
@@ -54,7 +56,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String sort, String fields, Specification<Recipe> recipeSpec) {
+    public CollectionModel<RecipeDTO> findAll(int offset, int limit, String sort, String fields, Specification<Recipe> recipeSpec, HashMap<String, String> specificationKeyValuePairs) {
         PageRequest pageRequest;
 
         if(sort == null) {
@@ -64,24 +66,24 @@ public class RecipeServiceImpl implements RecipeService {
             pageRequest = PageRequest.of(offset, limit, Sort.by(sortOrder));
         }
         Page<Recipe> recipes = recipeRepository.findAll(recipeSpec, pageRequest);
-        if(! CollectionUtils.isEmpty(recipes.getContent())) {
+        if(CollectionUtils.isEmpty(recipes.getContent())) {
+            throw new RecipeNotFoundWithFilterAttributs(Recipe.class, specificationKeyValuePairs);
+        } else {
             return pagedResourcesAssembler.toModel(recipes, recipeAssembler);
         }
-        return null;
     }
 
     @Override
     public RecipeDTO findByUUID(String uuid){
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
-        if (recipe != null) {
-			return recipeAssembler.toModel(recipe);
-        }
-        return null;
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
+        return recipeAssembler.toModel(recipe);
     }
 
     @Override
     public CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid) {
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
         if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
             return imageAssembler.toCollectionModel(recipe.getImages());
         }
@@ -90,7 +92,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid) {
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
+        Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
         if(recipe != null && (! CollectionUtils.isEmpty(recipe.getIngredients())) ) {
             return ingredientAssembler.toCollectionModel(recipe.getIngredients());
         }
@@ -154,7 +157,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public RecipeDTO replaceByUUID(String uuid, RecipeDTO updatedRecipe) {
-        Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElse(null);
+        Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
         
         if (oldRecipe != null && updatedRecipe != null) {
             recipeRepository.findById(oldRecipe.getId())
@@ -208,7 +212,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public RecipeDTO updateByUUID(String uuid,  RecipeDTO updatedRecipe) {
-        Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElse(null);
+        Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
         if (oldRecipe != null && updatedRecipe != null) {
             recipeRepository.findById(oldRecipe.getId())
             .map(recipe -> {
@@ -290,14 +295,30 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Transactional
     @Override
-    public boolean removeByUUID(String uuid) {
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElse(null);
-        boolean wasRecipeDeleted = false;
-        if(recipe != null) {
-            recipeRepository.deleteById(recipe.getId());
-            wasRecipeDeleted = true;
+    public RecipeDTO removeByUUID(String uuid) {
+
+        Recipe thisRecipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
+        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
+
+        if(thisRecipe != null) {
+            if(thisRecipe.getImages() != null){
+
+                for(Image image : thisRecipe.getImages()){
+                    thisRecipe.resetImage(image);
+                }
+                thisRecipe.resetImageList();
+            }
+        if(thisRecipe.getIngredients() != null) {
+
+            for(Ingredient ingredient : thisRecipe.getIngredients()){
+                thisRecipe.resetIngredient(ingredient);
+            }
+            thisRecipe.resetIngredientList();
         }
-        return wasRecipeDeleted;
+
+        recipeRepository.deleteById(thisRecipe.getId());
+        }
+        return recipeAssembler.toModel(thisRecipe);
     }
 
 }
