@@ -37,12 +37,11 @@ import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 import HSEsslingen.WebServices.RecipesService.exceptions.FieldAttributeNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundException;
+import HSEsslingen.WebServices.RecipesService.exceptions.UnknowSelectionAttribute;
+import HSEsslingen.WebServices.RecipesService.exceptions.WrongValueForPaginationValuesException;
 import HSEsslingen.WebServices.RecipesService.services.ImageService;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -60,7 +59,6 @@ public class RecipeController {
 
     private HashMap<String, String> getSpecificationKeyValuePairs(Specification<Recipe> recipeSpec) {
         List<String> recipePropertys = Arrays.asList(tempPropertys);
-
         HashMap<String, String> finalHashMap = new HashMap<>();
         String[] specs = recipeSpec.toString().split("\\[");
         String[]  exceptedValues;
@@ -75,7 +73,7 @@ public class RecipeController {
                     if(expetedValue.length() > 14) {
                         determinedExpectedValue = expetedValue.substring(14);
                     }
-            }
+                }
             } else if(spec.startsWith("dateFormat=null, onTypeMismatch=EMPTY_RESULT], ")){
                 pathValues = spec.split("dateFormat=null, onTypeMismatch=EMPTY_RESULT], ");
                 for(String pathValue: pathValues){
@@ -87,11 +85,11 @@ public class RecipeController {
                                     if((determinedPathValue != null) && (determinedExpectedValue != null)) {
                                         finalHashMap.put(determinedPathValue, determinedExpectedValue);
                                     }
-                                }
-                            }
+                                } 
                         }
                     }
                 }
+            }
         }
         return finalHashMap;
     }
@@ -113,21 +111,36 @@ public class RecipeController {
             }) Specification<Recipe> recipeSpec,
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "20") Integer limit, 
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size, 
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false,defaultValue = "") String fields,
+            @RequestParam(required = false) String fields,
             HttpServletRequest request ) throws JsonProcessingException, RecipeNotFoundException {
             
+            if(page != null) {
+                offset = page;
+            }
+            if(size != null){
+                limit = size;
+            }
+
             CollectionModel<RecipeDTO> recipes = null;
             HashMap<String, String> specificationKeyValuePairs = null;
             if(recipeSpec != null) {
             specificationKeyValuePairs =  getSpecificationKeyValuePairs(recipeSpec);
             } 
+
+            if(offset < 0 || offset > 2147483647) {
+                throw new WrongValueForPaginationValuesException(Recipe.class, "offset", offset);
+            } else if(limit < 0 || limit > 2147483647) {
+                throw new WrongValueForPaginationValuesException(Recipe.class, "limit", limit);
+            }
             
             recipes = recipeService.findAll(offset, limit, sort, fields, recipeSpec, specificationKeyValuePairs);
 
         
         String[] tempFields; 
-        if(fields.equals("")) {
+        if(fields == null || fields.equals("")) {
            tempFields = tempPropertys;
         } else {
             List<String> tempList = new ArrayList<>();
@@ -211,7 +224,7 @@ public class RecipeController {
     public ResponseEntity<?> addRecipe(@RequestBody @Valid RecipeDTO recipe) {
             if (recipe != null) {
                 RecipeDTO recipeDTO = recipeService.insert(recipe);
-                return ResponseEntity.created(recipeDTO.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(recipeDTO);
+                return ResponseEntity.created(recipeDTO.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
             }
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }

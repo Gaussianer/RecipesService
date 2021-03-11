@@ -25,9 +25,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import HSEsslingen.WebServices.RecipesService.errors.ApiError;
 import HSEsslingen.WebServices.RecipesService.exceptions.FieldAttributeNotFoundException;
+import HSEsslingen.WebServices.RecipesService.exceptions.ImageNotFoundException;
+import HSEsslingen.WebServices.RecipesService.exceptions.IngredientNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.MissingAttributeWhileCreatingRecipeException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundWithFilterAttributs;
+import HSEsslingen.WebServices.RecipesService.exceptions.UnknowSelectionAttribute;
+import HSEsslingen.WebServices.RecipesService.exceptions.UnknowSortAttributeException;
+import HSEsslingen.WebServices.RecipesService.exceptions.WrongValueForPaginationValuesException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -135,11 +140,47 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         apiError.setSummary("Recipe could not be found");
         apiError.setDetails(ex.getMessage() + " Probably the UUID is incorrect. Check whether the UUID really exists.");
         apiError.setErrorCode("R-0100");
-        apiError.setInformation("http://application-name/errors/R-0100");
+        apiError.setInformation("http://recipe-service/errors/R-0100");
         apiError.setUuid(ex.getID());
         return buildResponseEntity(apiError, NOT_FOUND);
     }
 
+    /**
+     * Handles RecipeNotFoundException. Created to encapsulate errors with more detail than javax.persistence.RecipeNotFoundException.
+     *
+     * @param ex the RecipeNotFoundException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(IngredientNotFoundException.class)
+    protected ResponseEntity<Object> handleIngredientNotFound(IngredientNotFoundException ex) {
+        ApiError apiError = new ApiError(404);
+        apiError.setType("https://httpstatuses.com/404");
+        apiError.setSummary("Ingredient could not be found");
+        apiError.setDetails(ex.getMessage() + " Probably the UUID is incorrect. Check whether the UUID really exists.");
+        apiError.setErrorCode("R-0107");
+        apiError.setInformation("http://recipe-service/errors/R-0107");
+        apiError.setUuid(ex.getID());
+        return buildResponseEntity(apiError, NOT_FOUND);
+    }
+    
+    /**
+     * Handles RecipeNotFoundException. Created to encapsulate errors with more detail than javax.persistence.RecipeNotFoundException.
+     *
+     * @param ex the RecipeNotFoundException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(ImageNotFoundException.class)
+    protected ResponseEntity<Object> handleRecipeNotFound(ImageNotFoundException ex) {
+        ApiError apiError = new ApiError(404);
+        apiError.setType("https://httpstatuses.com/404");
+        apiError.setSummary("Image could not be found");
+        apiError.setDetails(ex.getMessage() + " Probably the UUID is incorrect. Check whether the UUID really exists.");
+        apiError.setErrorCode("R-0108");
+        apiError.setInformation("http://recipe-service/errors/R-0108");
+        apiError.setUuid(ex.getID());
+        return buildResponseEntity(apiError, NOT_FOUND);
+    }
+    
     /**
      * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
      *
@@ -154,11 +195,62 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             apiError.setSummary("No recipe with the specified filter attributes could be found.");
             apiError.setDetails("There is no recipe that fulfils the conditions of the filter attributes: " + ex.getSpecificationKeyValuePairs().toString() + " You may want to check the values of the filter attributes. Alternatively, you can change the condition.");
             apiError.setErrorCode("R-0104");
-            apiError.setInformation("http://application-name/errors/R-0104");
+            apiError.setInformation("http://recipe-service/errors/R-0104");
             return buildResponseEntity(apiError, NOT_FOUND);
     }
 
-        /**
+    /**
+     * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
+     *
+     * @param ex the EntityNotFoundException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(UnknowSelectionAttribute.class)
+    protected ResponseEntity<Object> handleEntityNotFound(UnknowSelectionAttribute ex) {
+            ApiError apiError = new ApiError(400);
+            apiError.setType("https://httpstatuses.com/400");
+            apiError.setSummary("Incorrect filter attributes");
+            apiError.setDetails("The following attributes are incorrect: : " + ex.getSpecificationKeyValuePairs().toString() + " You should check that they have been named correctly.");
+            apiError.setErrorCode("R-0104");
+            apiError.setInformation("http://recipe-service/errors/R-0104");
+            return buildResponseEntity(apiError, BAD_REQUEST);
+    }
+
+    /**
+     * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
+     *
+     * @param ex the EntityNotFoundException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(WrongValueForPaginationValuesException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(WrongValueForPaginationValuesException ex) {
+            ApiError apiError = new ApiError(422);
+            apiError.setType("https://httpstatuses.com/422");
+            apiError.setSummary("Incorrect pagination attributes");
+            apiError.setDetails("The value of the following pagination attribute is incorrect: '" + ex.getParameterName() + "'. Value given: " + ex.getValue() + " .You should check that they have been named correctly. The value must be between 0 and 2147483647.");
+            apiError.setErrorCode("R-0111");
+            apiError.setInformation("http://recipe-servicee/errors/R-0111");
+            return buildResponseEntity(apiError, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
+     *
+     * @param ex the EntityNotFoundException
+     * @return the ApiError object
+     */
+    @ExceptionHandler(UnknowSortAttributeException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(UnknowSortAttributeException ex) {
+            ApiError apiError = new ApiError(422);
+            apiError.setType("https://httpstatuses.com/422");
+            apiError.setSummary("Unknown sort attribute");
+            apiError.setDetails("The attribute with the name '" + ex.getAttributeName() + "' is unknown. Check that the name is correct. ");
+            apiError.setErrorCode("R-0113");
+            apiError.setInformation("http://recipe-servicee/errors/R-0113");
+            return buildResponseEntity(apiError, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    
+    /**
      * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
      *
      * @param ex the EntityNotFoundException
@@ -174,11 +266,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             String details = "No recipe could be created due to missing attributes. The missing attributes are: " + missingAttributesList + " Make sure that the attributes are present. They must not be NULL.";
             apiError.setDetails(details);
             apiError.setErrorCode("R-0105");
-            apiError.setInformation("http://application-name/errors/R-0105");
+            apiError.setInformation("http://recipe-service/errors/R-0105");
             return buildResponseEntity(apiError, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    
     /**
      * Handles RecipeNotFoundException. Created to encapsulate errors with more detail than javax.persistence.RecipeNotFoundException.
      *

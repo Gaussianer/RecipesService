@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -17,12 +20,13 @@ import org.springframework.util.CollectionUtils;
 import HSEsslingen.WebServices.RecipesService.assemblers.ImageAssembler;
 import HSEsslingen.WebServices.RecipesService.assemblers.IngredientAssembler;
 import HSEsslingen.WebServices.RecipesService.assemblers.RecipeAssembler;
-import HSEsslingen.WebServices.RecipesService.dtos.ImageDTO;
-import HSEsslingen.WebServices.RecipesService.dtos.IngredientDTO;
+import HSEsslingen.WebServices.RecipesService.controller.RecipeController;
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
 import HSEsslingen.WebServices.RecipesService.entities.Image;
 import HSEsslingen.WebServices.RecipesService.entities.Ingredient;
 import HSEsslingen.WebServices.RecipesService.entities.Recipe;
+import HSEsslingen.WebServices.RecipesService.exceptions.ImageNotFoundException;
+import HSEsslingen.WebServices.RecipesService.exceptions.IngredientNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.MissingAttributeWhileCreatingRecipeException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundException;
 import HSEsslingen.WebServices.RecipesService.exceptions.RecipeNotFoundWithFilterAttributs;
@@ -31,6 +35,8 @@ import HSEsslingen.WebServices.RecipesService.repositories.IngredientRepository;
 import HSEsslingen.WebServices.RecipesService.repositories.RecipeRepository;
 import HSEsslingen.WebServices.RecipesService.services.RecipeService;
 import HSEsslingen.WebServices.RecipesService.services.helper.ServiceHelper;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
@@ -39,21 +45,18 @@ public class RecipeServiceImpl implements RecipeService {
     private final ImageRepository imageRepository;
     private final IngredientRepository ingredientRepository;
     private final RecipeAssembler recipeAssembler;
-    private final ImageAssembler imageAssembler;
-    private final IngredientAssembler ingredientAssembler;
     private final PagedResourcesAssembler pagedResourcesAssembler;
     private final ServiceHelper serviceHelper;
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository, ImageRepository imageRepository, IngredientRepository ingredientRepository,RecipeAssembler recipeAssembler, 
-    ImageAssembler imageAssembler, IngredientAssembler ingredientAssembler, PagedResourcesAssembler pagedResourcesAssembler, ServiceHelper serviceHelper) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, ImageRepository imageRepository, IngredientRepository ingredientRepository,RecipeAssembler recipeAssembler,  
+    PagedResourcesAssembler pagedResourcesAssembler, ServiceHelper serviceHelper) {
         this.recipeRepository = recipeRepository;
         this.recipeAssembler = recipeAssembler;
-        this.imageAssembler = imageAssembler;
-        this.ingredientAssembler = ingredientAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.imageRepository = imageRepository;
         this.ingredientRepository = ingredientRepository;
         this.serviceHelper = serviceHelper;
+        this.pagedResourcesAssembler.setForceFirstAndLastRels(false);
     }
 
     @Override
@@ -70,7 +73,7 @@ public class RecipeServiceImpl implements RecipeService {
         if(CollectionUtils.isEmpty(recipes.getContent())) {
             throw new RecipeNotFoundWithFilterAttributs(Recipe.class, specificationKeyValuePairs);
         } else {
-            return pagedResourcesAssembler.toModel(recipes, recipeAssembler);
+            return pagedResourcesAssembler.toModel(recipes, recipeAssembler, new Link("http://localhost:8080/recipes").withSelfRel());
         }
     }
 
@@ -79,26 +82,6 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
         new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
         return recipeAssembler.toModel(recipe);
-    }
-
-    @Override
-    public CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid) {
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
-        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
-        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getImages())) ) {
-            return imageAssembler.toCollectionModel(recipe.getImages());
-        }
-        return null;
-    }
-
-    @Override
-    public CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid) {
-        Recipe recipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
-        new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
-        if(recipe != null && (! CollectionUtils.isEmpty(recipe.getIngredients())) ) {
-            return ingredientAssembler.toCollectionModel(recipe.getIngredients());
-        }
-        return null;
     }
 
     @Override
@@ -142,22 +125,28 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeDTO.getRestingTimeInSeconds() != null) {
             recipe.setRestingTimeInSeconds(recipeDTO.getRestingTimeInSeconds());
         }
-        if(!recipeDTO.getImages().isEmpty()){
-            for(String imageUUID : recipeDTO.getImages()){
-                Image image = imageRepository.findByUuid(imageUUID).orElse(null);
-                
-                if(image != null){
-                    recipe.addImage(image);
-                } 
+        if(recipeDTO.getImages() != null ){
+            if(!recipeDTO.getImages().isEmpty()){
+                for(String imageUUID : recipeDTO.getImages()){
+                    Image image = imageRepository.findByUuid(imageUUID).orElseThrow(()-> 
+                    new ImageNotFoundException(Image.class, imageUUID, "ID", imageUUID));
+                    
+                    if(image != null){
+                        recipe.addImage(image);
+                    } 
+                }
             }
         }
-        if(!recipeDTO.getIngredients().isEmpty()){
-            for(String ingredientUUID : recipeDTO.getIngredients()){
-                Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElse(null);
-    
-                if(ingredient != null){
-                    recipe.addIngredient(ingredient);
-                } 
+
+        if(recipeDTO.getIngredients() != null ){
+            if(!recipeDTO.getIngredients().isEmpty()){
+                for(String ingredientUUID : recipeDTO.getIngredients()){
+                    Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElseThrow(()-> 
+                    new IngredientNotFoundException(Image.class, ingredientUUID, "ID", ingredientUUID));
+                    if(ingredient != null){
+                        recipe.addIngredient(ingredient);
+                    } 
+                }
             }
         }
     
@@ -168,45 +157,80 @@ public class RecipeServiceImpl implements RecipeService {
     public RecipeDTO replaceByUUID(String uuid, RecipeDTO updatedRecipe) {
         Recipe oldRecipe = recipeRepository.findByUuid(uuid).orElseThrow(()-> 
         new RecipeNotFoundException(Recipe.class, uuid, "ID", uuid));
-        
+
+        String[] missingAttributes = serviceHelper.getMissingRecipeAttributes(updatedRecipe);
+        if(missingAttributes != null) {
+            throw new MissingAttributeWhileCreatingRecipeException(Recipe.class, missingAttributes);
+        }
+
         if (oldRecipe != null && updatedRecipe != null) {
             recipeRepository.findById(oldRecipe.getId())
             .map(recipe -> {
                 Recipe tempRecipe = recipe;
                 boolean isSubResourceAvailable = true;
-                recipe.setTitle(updatedRecipe.getTitle());
-                recipe.setSubTitle(updatedRecipe.getSubTitle());
-                recipe.setDescription(updatedRecipe.getDescription());
-                recipe.setCategory(updatedRecipe.getCategory());
-                recipe.setServings(updatedRecipe.getServings());
-                recipe.setCalories(updatedRecipe.getCalories());
-                recipe.setLevelOfDifficulty(updatedRecipe.getLevelOfDifficulty());
-                recipe.setWorkingTimeInSeconds(updatedRecipe.getWorkingTimeInSeconds());
-                recipe.setCookingTimeInSeconds(updatedRecipe.getCookingTimeInSeconds());
-                recipe.setRestingTimeInSeconds(updatedRecipe.getRestingTimeInSeconds());
-
-                for(Image image : recipe.getImages()){
-                    recipe.removeImage(image);
+                if(updatedRecipe.getTitle() != null) {
+                    recipe.setTitle(updatedRecipe.getTitle());
+                } 
+                if(updatedRecipe.getSubTitle() != null) {
+                    recipe.setSubTitle(updatedRecipe.getSubTitle());
                 }
-                for(String imageUUID : updatedRecipe.getImages()){
-                    Image image = imageRepository.findByUuid(imageUUID).orElse(null);
-                    if(image != null) {
-                        recipe.addImage(image);
-                    } else {
-                        isSubResourceAvailable = false;
+                if(updatedRecipe.getDescription() != null) {
+                    recipe.setDescription(updatedRecipe.getDescription());
+                }
+                if(updatedRecipe.getCategory() != null) {
+                    recipe.setCategory(updatedRecipe.getCategory());
+                }
+                if(updatedRecipe.getServings() != null) {
+                    recipe.setServings(updatedRecipe.getServings());
+                }
+                if(updatedRecipe.getCalories() != null) {
+                    recipe.setCalories(updatedRecipe.getCalories());
+                }
+                if(updatedRecipe.getLevelOfDifficulty() != null) {
+                    recipe.setLevelOfDifficulty(updatedRecipe.getLevelOfDifficulty());
+                }
+                if(updatedRecipe.getWorkingTimeInSeconds() != null) {
+                    recipe.setWorkingTimeInSeconds(updatedRecipe.getWorkingTimeInSeconds());
+                }
+                if(updatedRecipe.getCookingTimeInSeconds() != null) {
+                    recipe.setCookingTimeInSeconds(updatedRecipe.getCookingTimeInSeconds());
+                }
+                if(updatedRecipe.getRestingTimeInSeconds() != null) {
+                    recipe.setRestingTimeInSeconds(updatedRecipe.getRestingTimeInSeconds());
+                }
+                if(updatedRecipe.getImages() != null){
+
+                    for(Image image : recipe.getImages()){
+                        recipe.resetImage(image);
                     }
-                    recipe.addImage(image);
-                }
+                    recipe.resetImageList();
 
-                for(Ingredient ingredient : recipe.getIngredients()){
-                    recipe.removeIngredient(ingredient);
+                    for(String imageUUID : updatedRecipe.getImages()) {
+                        Image image = imageRepository.findByUuid(imageUUID).orElseThrow(()-> 
+                        new ImageNotFoundException(Image.class, imageUUID, "ID", imageUUID));
+                        
+                        if(image != null) {
+                            recipe.addImage(image);
+                        } else {
+                            isSubResourceAvailable = false;
+                        }
+                    }
                 }
-                for(String ingredientUUID : updatedRecipe.getIngredients()){
-                    Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElse(null);
-                    if(ingredient != null) {
-                        recipe.addIngredient(ingredient);
-                    } else {
-                        isSubResourceAvailable = false;
+                if(updatedRecipe.getIngredients() != null) {
+
+                    for(Ingredient ingredient : recipe.getIngredients()){
+                        recipe.resetIngredient(ingredient);
+                    }
+                    recipe.resetIngredientList();
+
+                    for(String ingredientUUID : updatedRecipe.getIngredients()){
+                        Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElseThrow(()-> 
+                        new IngredientNotFoundException(Image.class, ingredientUUID, "ID", ingredientUUID));
+                        if(ingredient != null) {
+                            recipe.addIngredient(ingredient);
+                        } else {
+                            isSubResourceAvailable = false;
+                        }
                     }
                 }
                 if(isSubResourceAvailable) {
@@ -266,8 +290,8 @@ public class RecipeServiceImpl implements RecipeService {
                     recipe.resetImageList();
 
                     for(String imageUUID : updatedRecipe.getImages()) {
-                        // Wenn Image nicht gefunden wird -> Fehlermeldung an Client!
-                        Image image = imageRepository.findByUuid(imageUUID).orElse(null);
+                        Image image = imageRepository.findByUuid(imageUUID).orElseThrow(()-> 
+                        new ImageNotFoundException(Image.class, imageUUID, "ID", imageUUID));
                         if(image != null) {
                             recipe.addImage(image);
                         } else {
@@ -283,8 +307,8 @@ public class RecipeServiceImpl implements RecipeService {
                     recipe.resetIngredientList();
 
                     for(String ingredientUUID : updatedRecipe.getIngredients()){
-                        // Wenn Ingredient nicht gefunden wird -> Fehlermeldung an Client!
-                        Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElse(null);
+                        Ingredient ingredient = ingredientRepository.findByUuid(ingredientUUID).orElseThrow(()-> 
+                        new IngredientNotFoundException(Image.class, ingredientUUID, "ID", ingredientUUID));
                         if(ingredient != null) {
                             recipe.addIngredient(ingredient);
                         } else {

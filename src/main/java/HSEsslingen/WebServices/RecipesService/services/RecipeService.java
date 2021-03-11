@@ -12,13 +12,7 @@ import HSEsslingen.WebServices.RecipesService.entities.Recipe;
 
 public interface RecipeService {
 
-    // CollectionModel<RecipeDTO> findAll(int page, int size, String[] sort, String dir);
-
     CollectionModel<RecipeDTO> findAll(int page, int size, String sort, String fields, Specification<Recipe> recipeSpec, HashMap<String, String> specificationKeyValuePairs);
-    
-    CollectionModel<ImageDTO> findRecipeImagesByUUID(String uuid);
-
-    CollectionModel<IngredientDTO> findRecipeIngredientsByUUID(String uuid);
 
     RecipeDTO findByUUID(String uuid);
 

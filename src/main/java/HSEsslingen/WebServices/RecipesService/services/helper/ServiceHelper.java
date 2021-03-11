@@ -1,16 +1,19 @@
 package HSEsslingen.WebServices.RecipesService.services.helper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import HSEsslingen.WebServices.RecipesService.dtos.RecipeDTO;
+import HSEsslingen.WebServices.RecipesService.entities.Recipe;
+import HSEsslingen.WebServices.RecipesService.exceptions.UnknowSortAttributeException;
 
 @Component
 public class ServiceHelper {
-    
+    private String[] tempPropertys = {"id", "title", "subTitle", "description", "category", "servings", "calories", "levelOfDifficulty", "workingTimeInSeconds", "cookingTimeInSeconds", "restingTimeInSeconds", "images", "ingredients", "links"};
     private char ASC = '+';
     private char DESC = '-';
 
@@ -40,14 +43,20 @@ public class ServiceHelper {
             if(query.charAt(0) == ' '){
                 query = getPropertyWithAscendingPrefix(query);
             }
+            List<String> recipePropertys = Arrays.asList(tempPropertys);
             String property = query.substring(1);
-            if(query.charAt(0) == ASC) {
-                sortOrder.add(new Sort.Order(Sort.Direction.ASC, property));
-            } else if(query.charAt(0) == DESC) {
-                sortOrder.add(new Sort.Order(Sort.Direction.DESC, property));
+            if(recipePropertys.contains(property)){
+                if(query.charAt(0) == ASC) {
+                    sortOrder.add(new Sort.Order(Sort.Direction.ASC, property));
+                } else if(query.charAt(0) == DESC) {
+                    sortOrder.add(new Sort.Order(Sort.Direction.DESC, property));
+                } else {
+                    sortOrder.add(new Sort.Order(Sort.Direction.ASC, property));
+                }
             } else {
-                sortOrder.add(new Sort.Order(Sort.Direction.ASC, property));
+                throw new UnknowSortAttributeException(Recipe.class, property);
             }
+            
         }
         return sortOrder;
     }
